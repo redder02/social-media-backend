@@ -17,6 +17,12 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Conditional server start for testing
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}
+
+// Export app for testing
+module.exports = app;

@@ -5,7 +5,11 @@ const User = require('../models/User');
 exports.register = async (req, res) => {
     const { username, email, password } = req.body;
     try {
-        
+        // Check if the email already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ msg: 'User already exists' });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         // const hashedPassword = password
         const user = new User({
@@ -25,12 +29,12 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ msg: 'Invalid email' });
+        if (!user) return res.status(400).json({ msg: 'Invalid credentials' });
 
         // Check if password matches the hashed password in the database
         const isMatch = await bcrypt.compare(password, user.password);
         // const isMatch = (user.password === password)
-        if (!isMatch) return res.status(400).json({ msg: 'Invalid password' });
+        if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
 
         // Generate JWT
         const token = jwt.sign({ user: { id: user.id } }, process.env.JWT_SECRET, { expiresIn: '1h' });
